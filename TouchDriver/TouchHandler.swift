@@ -72,18 +72,20 @@ func reportHidElement(element: HIDElement) {
   // Make a "Event" object from what just happened
   var event: Event?
 
-  if (element.usagePage == 1 && element.currentValue < 0x10000 && element.cookie != 0x73) {
+  if (element.usagePage == 1  && element.cookie != 0x73) {
     let value = Double(element.currentValue & 0xffff)
 
     if (element.usage == 0x30) { // X
-      Statics.fingerId = Int((element.cookie - 21) / 9)
+      Statics.fingerId = Int((element.cookie - 21) / 9) - 2
+//      print("X:\(value)")
       event = Event(finger: Statics.fingerId,
                     when: Date(),
                     type: HIDEventType.XCOORD,
                     button: InputType.NO_CHANGE,
                     input: Int(value * scale_x))
     } else if (element.usage == 0x31) { // Y
-      Statics.fingerId = Int((element.cookie - 24) / 9)
+      Statics.fingerId = Int((element.cookie - 24) / 9) - 2
+//      print("Y:\(value)")
       event = Event(finger: Statics.fingerId,
                     when: Date(),
                     type: HIDEventType.YCOORD,
@@ -92,6 +94,7 @@ func reportHidElement(element: HIDElement) {
     }
   } else if (element.usage == 0x56 && element.currentValue < 8000) {
     // doubleclicktimer
+//    print("TIPS:\(Statics.fingerId)")
     event = Event(finger: Statics.fingerId,
                   when: Date(),
                   type: HIDEventType.TIPSWITCH,
@@ -102,7 +105,8 @@ func reportHidElement(element: HIDElement) {
     // button
 
     // finger by cookie value, 15 is 0, 16 is 1, etc
-    Statics.fingerId = Int(element.cookie) - 15
+    Statics.fingerId = Int(element.cookie) - 15 - 14
+//    print("Press:\(Statics.fingerId)")
 
     event = Event(finger: Statics.fingerId,
                   when: Date(),
@@ -110,12 +114,16 @@ func reportHidElement(element: HIDElement) {
                   button: ((element.currentValue == 1) ? InputType.DOWN : InputType.UP),
                   input: 0)
   } else if (element.usage == 0x51 && element.currentValue != 0) {
+    
+//    print("CONTACTID:\(Statics.fingerId)")
+//    print("CONTACTID2:\(Int((element.cookie - 17) / 9))")
     event = Event(finger: Int((element.cookie - 17) / 9),
                   when: Date(),
                   type: HIDEventType.CONTACTID,
                   button: nil,
                   input: Int(element.currentValue / 4))
   } else if (element.usage == 0x54) {
+//    print("FINGERCOUNT:\(Statics.fingerId)")
     event = Event(finger: 0,
                   when: Date(),
                   type: HIDEventType.FINGERCOUNT,
@@ -176,6 +184,8 @@ func fixEvent(_ e: inout Event) {
 
   switch type {
   case .TIPSWITCH:
+    
+//    print("TIPSWITCH: \(fingerId)")
     if input == 0 {
       // Initialize
       Statics.fingerAlloc = 1
@@ -185,6 +195,8 @@ func fixEvent(_ e: inout Event) {
     Statics.nothingOn = false
   case .CONTACTID:
     Statics.fingerAlloc = input
+//    print("CONTACTID: \(Statics.fingerAlloc)")
+//    print("CONTACTID fingerID: \(fingerId)")
   case .FINGERCOUNT:
     if Statics.nothingOn {
       // sometimes, fingercount is called before timer is, so adjust values
@@ -267,7 +279,8 @@ func handleEvent(e: Event) {
   }
 
   // <debug>
-  print(e)
+//  print(e)
+  //print(e.input)
   if e.button == InputType.UP { print() } // break up chunks of events
   // </debug>
 
@@ -290,78 +303,80 @@ func handleEvent(e: Event) {
     guard let y = (fingerEvents.first { $0.type == HIDEventType.YCOORD })?.input else {
       return nil
     }
-
+    
     return Touch(x: Int(x), y: Int(y), when: Date())
   })()
 
   // Assuming we actually have some coordinates to work with...
-  if var curr_xy = curr_xy {
-    if e.type == HIDEventType.XCOORD { curr_xy.x = Int(e.input) }
-    if e.type == HIDEventType.YCOORD { curr_xy.y = Int(e.input) }
+  if curr_xy != nil{
+    if var curr_xy = curr_xy {
+      if e.type == HIDEventType.XCOORD { curr_xy.x = Int(e.input) }
+      if e.type == HIDEventType.YCOORD { curr_xy.y = Int(e.input) }
+      // If there is a press happening
+      if e.type == HIDEventType.PRESS {
 
-    // If there is a press happening
-    if e.type == HIDEventType.PRESS {
+        if e.button == InputType.DOWN {
+          start_xy[finger] = curr_xy
 
-      if e.button == InputType.DOWN {
-        start_xy[finger] = curr_xy
+          // [CONTEXT MENU]
+          // We potentially want to open the context menu...
+          open_context_menu = true
+        }
 
-        // [CONTEXT MENU]
-        // We potentially want to open the context menu...
-        open_context_menu = true
-      }
-
-      if e.button == InputType.UP {
-        // [CONTEXT MENU]
-        // Make sure that it was not just a tap
-        if let start_xy = start_xy[finger] {
-          let timePassed = Date().timeIntervalSince(start_xy.when)
-          if open_context_menu && timePassed > CONTEXT_MENU_DELAY {
-            simInput(touch: curr_xy, input: InputType.UP)
-            simInput(touch: curr_xy, input: InputType.RIGHT_CLICK)
+        if e.button == InputType.UP {
+          // [CONTEXT MENU]
+          // Make sure that it was not just a tap
+          if let start_xy = start_xy[finger] {
+            let timePassed = Date().timeIntervalSince(start_xy.when)
+            if open_context_menu && timePassed > CONTEXT_MENU_DELAY {
+              simInput(touch: curr_xy, input: InputType.UP)
+              simInput(touch: curr_xy, input: InputType.RIGHT_CLICK)
+            }
+            open_context_menu = false
           }
-          open_context_menu = false
-        }
 
-        // [DOUBLE CLICK]
-        if let last_up = (fingerEvents.first { $0.button == InputType.UP }) {
-          let last_up_dt = e.when.timeIntervalSince(last_up.when)
-          if last_up_dt < DOUBLECLICK_DELAY {
-            simInput(touch: curr_xy, input: InputType.DBL_CLICK)
-          }
-        }
-      }
-
-      // Do the click
-      simInput(touch: curr_xy, input: e.button!)
-    }
-
-    if e.type == HIDEventType.XCOORD || e.type == HIDEventType.YCOORD {
-
-      // These gestures require a valid start point
-      if start_xy[finger] != nil {
-        // [CONTEXT MENU]
-        // Only open context menu if the pointer has not moved too far from
-        // start location
-        if curr_xy.distFrom(p: start_xy[finger]!) > 10 {
-          open_context_menu = false
-        }
-
-        // [NOTIFICATION CENTER]
-        if abs(start_xy[finger]!.x - Int(SCREEN_RESX)) < 5 {
-          let dx = abs(curr_xy.x - start_xy[finger]!.x)
-          let dy = abs(curr_xy.y - start_xy[finger]!.y)
-          if dx > NOTIFICATION_CENTER_X_DELTA && dy < NOTIFICATION_CENTER_Y_DELTA {
-            simInput(touch: curr_xy, input: InputType.UP)
-            simInput(touch: curr_xy, input: InputType.NOTIFICATION_CENTER)
-            
-            // reset start
-            start_xy[finger] = nil
+          // [DOUBLE CLICK]
+          if let last_up = (fingerEvents.first { $0.button == InputType.UP }) {
+            let last_up_dt = e.when.timeIntervalSince(last_up.when)
+            if last_up_dt < DOUBLECLICK_DELAY {
+              simInput(touch: curr_xy, input: InputType.DBL_CLICK)
+            }
           }
         }
+
+        // Do the click
+        simInput(touch: curr_xy, input: e.button!)
       }
 
-      // Register the movement
-      simInput(touch: curr_xy, input: InputType.NO_CHANGE)
+      if e.type == HIDEventType.XCOORD || e.type == HIDEventType.YCOORD {
+
+        // These gestures require a valid start point
+        if start_xy[finger] != nil {
+          // [CONTEXT MENU]
+          // Only open context menu if the pointer has not moved too far from
+          // start location
+          if curr_xy.distFrom(p: start_xy[finger]!) > 10 {
+            open_context_menu = false
+          }
+
+          // [NOTIFICATION CENTER]
+          if abs(start_xy[finger]!.x - Int(SCREEN_RESX)) < 5 {
+            let dx = abs(curr_xy.x - start_xy[finger]!.x)
+            let dy = abs(curr_xy.y - start_xy[finger]!.y)
+            if dx > NOTIFICATION_CENTER_X_DELTA && dy < NOTIFICATION_CENTER_Y_DELTA {
+              simInput(touch: curr_xy, input: InputType.UP)
+              simInput(touch: curr_xy, input: InputType.NOTIFICATION_CENTER)
+              
+              // reset start
+              start_xy[finger] = nil
+            }
+          }
+        }
+
+        // Register the movement
+        simInput(touch: curr_xy, input: InputType.NO_CHANGE)
+      }
     }
   }
+  
 }

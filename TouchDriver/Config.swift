@@ -7,9 +7,9 @@
 
 // Touchscreen Info
 let TOUCH_VID: Int32 = 0x04f3
-let TOUCH_PID: Int32 = 0x24a1
-let TOUCH_RESX = 4004.0
-let TOUCH_RESY = 2264.0
+let TOUCH_PID: Int32 = 0x25ad
+let TOUCH_RESX = 2496.0
+let TOUCH_RESY = 1650.0
 let NUM_TOUCHES = 10
 
 

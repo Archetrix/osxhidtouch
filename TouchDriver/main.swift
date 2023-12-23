@@ -12,12 +12,25 @@ import AppKit
 var SCREEN_RESX = NSScreen.main!.frame.size.width
 var SCREEN_RESY = NSScreen.main!.frame.size.height
 
+if NSScreen.screens.count>1
+{
+    SCREEN_RESX = NSScreen.screens[1].frame.size.width
+    SCREEN_RESY = NSScreen.screens[1].frame.size.height
+}
 NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification,
                                        object: NSApplication.shared,
                                        queue: OperationQueue.main) {
     notification -> Void in
-    SCREEN_RESX = NSScreen.main!.frame.size.width
-    SCREEN_RESY = NSScreen.main!.frame.size.height
+    if NSScreen.screens.count>1
+    {
+        SCREEN_RESX = NSScreen.screens[1].frame.size.width
+        SCREEN_RESY = NSScreen.screens[1].frame.size.height
+    }
+    else
+    {
+        SCREEN_RESX = NSScreen.main!.frame.size.width
+        SCREEN_RESY = NSScreen.main!.frame.size.height
+    }
 }
 
 // Call legacy objective-c setup code with Swift callback function

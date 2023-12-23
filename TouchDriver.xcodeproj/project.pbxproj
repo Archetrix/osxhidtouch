@@ -34,7 +34,7 @@
 		113D4CE3184000800051122B /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		113D4CE61840E8600051122B /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		113D4CE71842AE330051122B /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
-		113F64D6183E93B20041DE1B /* HidSample */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = HidSample; path = TouchDriver; sourceTree = BUILT_PRODUCTS_DIR; };
+		113F64D6183E93B20041DE1B /* TouchDriver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TouchDriver; sourceTree = BUILT_PRODUCTS_DIR; };
 		113F64D9183E93B20041DE1B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		113F64DF183E93B20041DE1B /* TouchDriver-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TouchDriver-Prefix.pch"; sourceTree = "<group>"; };
 		621AE76A1F48AFE60009052A /* ThingStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThingStream.swift; sourceTree = "<group>"; };
@@ -71,7 +71,7 @@
 		113F64D7183E93B20041DE1B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				113F64D6183E93B20041DE1B /* HidSample */,
+				113F64D6183E93B20041DE1B /* TouchDriver */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -131,7 +131,7 @@
 			);
 			name = TouchDriver;
 			productName = HidSample;
-			productReference = 113F64D6183E93B20041DE1B /* HidSample */;
+			productReference = 113F64D6183E93B20041DE1B /* TouchDriver */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -153,6 +153,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 113F64CD183E93B20041DE1B;
@@ -283,6 +284,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TouchDriver/TouchDriver-Prefix.pch";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "TouchDriver/TouchDriver-Bridging-Header.h";
@@ -299,6 +301,7 @@
 				GCC_PREFIX_HEADER = "TouchDriver/TouchDriver-Prefix.pch";
 				"INFOPLIST_FILE[sdk=macosx10.8]" = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "TouchDriver/TouchDriver-Bridging-Header.h";

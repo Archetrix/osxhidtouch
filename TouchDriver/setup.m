@@ -298,7 +298,7 @@ void DeviceNotification(void*         refCon,
 
 bool acceptHidElement(HIDElement *element) {
 //    // DEBUG
-//    printHidElement("acceptHidElement", element);
+    //printHidElement("acceptHidElement", element);
 
     switch (element->usagePage) {
         case kHIDPage_GenericDesktop:
@@ -468,7 +468,7 @@ bool SetupQueue(HIDData* hidDataRef)
             continue;
 
 //        // DEBUG
-//        printHidElement("SetupQueue", tempHIDElement);
+        //printHidElement("SetupQueue", tempHIDElement);
 
         if ((tempHIDElement->type < kIOHIDElementTypeInput_Misc) || (tempHIDElement->type > kIOHIDElementTypeInput_ScanCodes))
             continue;

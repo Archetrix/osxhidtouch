@@ -5,6 +5,9 @@
 //  Created by Daniel Prilik on 2017-08-21.
 //
 
+import CoreGraphics
+import AppKit
+
 let applescripts: [String: NSAppleScript?] = [
     "notification_center": NSAppleScript(source: """
         tell application "System Events"
@@ -14,7 +17,14 @@ let applescripts: [String: NSAppleScript?] = [
 ]
 
 func simInput(touch: Touch, input: InputType) {
-    let point = CGPoint(x: touch.x, y: touch.y)
+    var firstscreenX = 0
+    var firstscreenY = 0
+    if NSScreen.screens.count>1
+    {
+        firstscreenX = Int(NSScreen.screens[1].frame.minX)
+        firstscreenY = Int(NSScreen.screens[1].frame.minY)-25
+    }
+    let point = CGPoint(x: firstscreenX + touch.x, y:firstscreenY + touch.y)
 
     switch input {
     case .DOWN:
