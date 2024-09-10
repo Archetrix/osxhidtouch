@@ -14,13 +14,15 @@ import Foundation
  */
 public final class ThingStream<T> {
     // Internally represented as a linked list
-    private class Node<T> {
-        let val: T
+    // [Andreas Geesen]
+    // I have changed the T within this private class into N because Xcode complained about shadowing variables being bad.
+    private class Node<N> {
+        let val: N
 
-        var next: Node<T>? = nil
-        var prev: Node<T>? = nil
+        var next: Node<N>? = nil
+        var prev: Node<N>? = nil
 
-        init(value: T) {
+        init(value: N) {
             self.val = value
         }
     }
