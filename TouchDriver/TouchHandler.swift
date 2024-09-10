@@ -61,7 +61,7 @@ func reportHidElement(element: HIDElement) {
 //    static var fingerId: Int = 0
 //  }
 //
-
+//print(element)
   // [Daniel Prilik]
   // This function is HID spec magic, at least for me :)
   // But hey, if it works, who am I to care!
@@ -71,21 +71,27 @@ func reportHidElement(element: HIDElement) {
 
   // Make a "Event" object from what just happened
   var event: Event?
-
+  
+  // [Andreas Geesen]
+  // The whole "finger by cookie value" logic here seems not to work with my screen at all
+  // Until i figure this out i'm defaulting to one finger only.
+  // This is why we set:
+  Statics.fingerId=0;
+  
   if (element.usagePage == 1  && element.cookie != 0x73) {
     let value = Double(element.currentValue & 0xffff)
 
     if (element.usage == 0x30) { // X
-      Statics.fingerId = Int((element.cookie - 21) / 9) - 2
-//      print("X:\(value)")
+      //Statics.fingerId = Int((element.cookie - 21) / 9) - 2
+      //print("X:\(value) * \(scale_x) = \(value * scale_x)")
       event = Event(finger: Statics.fingerId,
                     when: Date(),
                     type: HIDEventType.XCOORD,
                     button: InputType.NO_CHANGE,
                     input: Int(value * scale_x))
     } else if (element.usage == 0x31) { // Y
-      Statics.fingerId = Int((element.cookie - 24) / 9) - 2
-//      print("Y:\(value)")
+      //Statics.fingerId = Int((element.cookie - 24) / 9) - 2
+      //print("Y:\(value) * \(scale_y) = \(value * scale_y)")
       event = Event(finger: Statics.fingerId,
                     when: Date(),
                     type: HIDEventType.YCOORD,
@@ -94,7 +100,7 @@ func reportHidElement(element: HIDElement) {
     }
   } else if (element.usage == 0x56 && element.currentValue < 8000) {
     // doubleclicktimer
-//    print("TIPS:\(Statics.fingerId)")
+    //print("TIPS:\(Statics.fingerId)")
     event = Event(finger: Statics.fingerId,
                   when: Date(),
                   type: HIDEventType.TIPSWITCH,
@@ -105,8 +111,8 @@ func reportHidElement(element: HIDElement) {
     // button
 
     // finger by cookie value, 15 is 0, 16 is 1, etc
-    Statics.fingerId = Int(element.cookie) - 15 - 14
-//    print("Press:\(Statics.fingerId)")
+    //Statics.fingerId = Int(element.cookie) - 15 - 14
+    //print("Press:\(Statics.fingerId)")
 
     event = Event(finger: Statics.fingerId,
                   when: Date(),
@@ -115,15 +121,15 @@ func reportHidElement(element: HIDElement) {
                   input: 0)
   } else if (element.usage == 0x51 && element.currentValue != 0) {
     
-//    print("CONTACTID:\(Statics.fingerId)")
-//    print("CONTACTID2:\(Int((element.cookie - 17) / 9))")
-    event = Event(finger: Int((element.cookie - 17) / 9),
+    //print("CONTACTID:\(Statics.fingerId)")
+    //print("CONTACTID2:\(Int((element.cookie - 17) / 9))")
+    event = Event(finger: 0, //Int((element.cookie - 17) / 9),
                   when: Date(),
                   type: HIDEventType.CONTACTID,
                   button: nil,
                   input: Int(element.currentValue / 4))
   } else if (element.usage == 0x54) {
-//    print("FINGERCOUNT:\(Statics.fingerId)")
+    //print("FINGERCOUNT:\(Statics.fingerId)")
     event = Event(finger: 0,
                   when: Date(),
                   type: HIDEventType.FINGERCOUNT,
@@ -171,16 +177,22 @@ func fixEvent(_ e: inout Event) {
     }
   }
 
-  var fingerId = e.finger
+  //var fingerId = e.finger
+  let fingerId = e.finger
   let type = e.type
   let input = e.input
-  let button = e.button
+  //let button = e.button
 
-  if button != InputType.DOWN {
+  if fingerId < 0 { return }
+
+  /*
+   if button != InputType.DOWN {
     fingerId = Statics.indexFixer[fingerId]
   }
 
-  if fingerId == -1 { return }
+  if fingerId < 0 { return }
+  //print("FingerId: ",fingerId)
+   */
 
   switch type {
   case .TIPSWITCH:
@@ -225,7 +237,8 @@ func fixEvent(_ e: inout Event) {
     }
     Statics.fingerCount = input
   case .PRESS:
-    if button == InputType.DOWN {
+    /*
+     if button == InputType.DOWN {
       Statics.pressed[fingerId] = true
     }
 
@@ -235,6 +248,9 @@ func fixEvent(_ e: inout Event) {
       // calculate original array indexes
       recalculateIndex()
     }
+     */
+    
+  break
   default: break
   }
 
@@ -279,18 +295,18 @@ func handleEvent(e: Event) {
   }
 
   // <debug>
-//  print(e)
+  //print(e)
   //print(e.input)
-  if e.button == InputType.UP { print() } // break up chunks of events
+  //if e.button == InputType.UP { print() } // break up chunks of events
   // </debug>
 
-  if e.finger != 0 {
+  /*if e.finger != 0 {
     // [CONTEXT MENU]
     open_context_menu = false
 
     // <<< REMOVE THIS ONCE STARTING ON MULTITOUCH GESTURES >>>
     return
-  }
+  }*/
 
   // To make life simple, define some variables related to the current finger
   let finger = e.finger
@@ -345,6 +361,7 @@ func handleEvent(e: Event) {
         }
 
         // Do the click
+        //print("click \(curr_xy)");
         simInput(touch: curr_xy, input: e.button!)
       }
 
@@ -374,6 +391,7 @@ func handleEvent(e: Event) {
         }
 
         // Register the movement
+        //print("move \(curr_xy)");
         simInput(touch: curr_xy, input: InputType.NO_CHANGE)
       }
     }
