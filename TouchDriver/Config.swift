@@ -6,11 +6,11 @@
 //
 
 // Touchscreen Info
-let TOUCH_VID: Int32 = 0x04f3
-let TOUCH_PID: Int32 = 0x25ad
-let TOUCH_RESX = 2496.0
-let TOUCH_RESY = 1650.0
-let NUM_TOUCHES = 10
+let TOUCH_VID: Int32 = 0x2207
+let TOUCH_PID: Int32 = 0x0017
+let TOUCH_RESX = 32768.0
+let TOUCH_RESY = 32768.0
+let NUM_TOUCHES = 1
 
 
 

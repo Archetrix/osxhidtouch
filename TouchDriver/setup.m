@@ -73,6 +73,7 @@ break; \
         USAGE(0xd, 0x54, "TouchCount");
         USAGE(0xd, 0x55, "Contact Count Maximum");
         USAGE(0xd, 0x56, "ScanTime");
+        USAGE(0xd, 0x4, "TW2424");
         USAGE(0xd, kHIDUsage_Dig_Touch, "Touch");
         USAGE(0xd, kHIDUsage_Dig_TouchScreen, "Touchscreen");
     } while (0);
