@@ -1,11 +1,12 @@
 osxhidtouch
 ===========
 
-(forked from daniel5151, forked from kyewei, who forked from astarasikov) 
+(forked from dcomputare who forked from daniel5151, forked from kyewei, who forked from astarasikov) 
 
 User-space HID multitouch touchscreen driver for Mac OS X
 
-Adapted to fit the HP Center of Room Control's hardware(TPC-I032-CRC) & resolution, and adding extra features 
-(like double-tap) 
+Adapted to fit the Iiyama TW2424AS
 
-Multifinger tracking is in the code, but dosen't work proprly.
+Multifinger tracking was in the code, but doesn't work properly.
+In fact i had to strip it down even more because the HID data from my touch device did not match expectations in code.
+Integer overflows occurred crashing the driver.
